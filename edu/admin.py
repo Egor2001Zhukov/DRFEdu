@@ -12,3 +12,7 @@ class CourseAdmin(admin.ModelAdmin):
 @admin.register(m.Lesson)
 class LessonAdmin(admin.ModelAdmin):
     list_display = ('title',)
+
+@admin.register(m.Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('datetime',)
