@@ -6,12 +6,11 @@ from edu.apps import EduConfig
 
 app_name = EduConfig.name
 
-router = DefaultRouter()
-router.register(r'courses', v.CourseViewSet, basename='courses')
-
 urlpatterns = [
+                  path('courses/', v.CourseListApiView.as_view(), name='courses'),
+                  path('courses/<int:pk>', v.CourseAPIView.as_view(), name='courses'),
                   path('lessons/', v.LessonListApiView.as_view(), name='lessons'),
                   path('lessons/<int:pk>', v.LessonAPIView.as_view(), name='lessons'),
                   path('payments/', v.PaymentListApiView.as_view(), name='payments')
 
-              ] + router.urls
+              ]

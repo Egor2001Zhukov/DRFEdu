@@ -6,7 +6,7 @@ from edu import models as m
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = m.Lesson
-        fields = ['id', 'title', 'description', 'video', 'preview']
+        fields = ['id', 'title', 'description', 'video', 'course']
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = m.Course
-        fields = ['id', 'title', 'description', 'preview', 'lessons_count', 'lessons']
+        fields = ['id', 'title', 'description', 'lessons_count', 'lessons']
 
 
 class PaymentSerializer(serializers.ModelSerializer):
