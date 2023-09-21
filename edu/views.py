@@ -1,66 +1,40 @@
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics as g
-from rest_framework import viewsets
-from rest_framework.decorators import action
+from rest_framework import generics
 from rest_framework.filters import OrderingFilter
-from rest_framework.permissions import BasePermission, IsAuthenticated
-from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
 
-from edu import models as m
-from edu import serializators as s
-
-
-class IsModeratorOrCreator(BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            if request.method in ['GET', 'POST']:
-                return True
-            elif request.user == view.get_object().user:
-                return True
-            else:
-                if request.user.groups.filter(name="moderators").exists():
-                    if request.method == 'PUT':
-                        print('Я модератор')
-                        return True
-        return False
+from edu import models
+from edu import serializators
+from edu.permissions import IsModeratorOrCreator
 
 
-class CourseListApiView(g.ListCreateAPIView):
-    queryset = m.Course.objects.all()
-    serializer_class = s.CourseSerializer
+class CourseViewSet(ModelViewSet):
+    queryset = models.Course.objects.all()
+    serializer_class = serializators.CourseSerializer
+    permission_classes = [IsModeratorOrCreator, IsAuthenticated]
 
     def perform_create(self, serializer):
-        new_course = serializer.save()
-        new_course.user = self.request.user
-        new_course.save()
+        serializer.save(user=self.request.user)
 
 
-class CourseAPIView(g.RetrieveUpdateDestroyAPIView):
-    queryset = m.Course.objects.all()
-    serializer_class = s.CourseSerializer
-    permission_classes = [IsModeratorOrCreator]
-
-
-class LessonListApiView(g.ListCreateAPIView):
-    queryset = m.Lesson.objects.all()
-    serializer_class = s.LessonSerializer
+class LessonListApiView(generics.ListCreateAPIView):
+    queryset = models.Lesson.objects.all()
+    serializer_class = serializators.LessonSerializer
 
     def perform_create(self, serializer):
-        new_lesson = serializer.save()
-        new_lesson.user = self.request.user
-        new_lesson.save()
+        serializer.save(user=self.request.user)
 
 
-class LessonAPIView(g.RetrieveUpdateDestroyAPIView):
-    queryset = m.Lesson.objects.all()
-    serializer_class = s.LessonSerializer
-    permission_classes = [IsModeratorOrCreator]
+class LessonAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Lesson.objects.all()
+    serializer_class = serializators.LessonSerializer
+    permission_classes = [IsModeratorOrCreator, IsAuthenticated]
 
 
-class PaymentListApiView(g.ListAPIView):
-    queryset = m.Payment.objects.all()
-    serializer_class = s.PaymentSerializer
+class PaymentListApiView(generics.ListAPIView):
+    queryset = models.Payment.objects.all()
+    serializer_class = serializators.PaymentSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['course', 'lesson', 'method']
     ordering_fields = ['datetime']
