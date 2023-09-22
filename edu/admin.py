@@ -13,6 +13,12 @@ class CourseAdmin(admin.ModelAdmin):
 class LessonAdmin(admin.ModelAdmin):
     list_display = ('title',)
 
+
 @admin.register(m.Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ('datetime',)
+
+
+@admin.register(m.Subscribe)
+class SubscribeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course')
