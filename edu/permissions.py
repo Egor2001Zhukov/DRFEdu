@@ -18,3 +18,11 @@ class IsModeratorOrCreator(permissions.BasePermission):
             if request.method == 'PUT':
                 return request.user.groups.filter(name="moderators").exists()
             return False
+
+
+class IsModerator(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.user.groups.filter(name="moderators").exists():
+            return True
+        return False
