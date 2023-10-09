@@ -1,13 +1,11 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status
-from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework.filters import OrderingFilter
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from edu import models
+from edu import models, tasks
 from edu import serializators
 from edu.permissions import IsModeratorOrCreator, IsModerator
 from edu.services import StripeService
@@ -23,6 +21,10 @@ class CourseViewSet(ModelViewSet):
         StripeService.create_product(product_id=course.id, name=course.title, description=course.description)
         StripeService.create_price(price=int(course.price * 100), product_id=course.id, name=course.title)
 
+    def perform_update(self, serializer):
+        course = serializer.save()
+        tasks.send_mainling.delay(course)
+
 
 class LessonListCreateApiView(generics.ListCreateAPIView):
     queryset = models.Lesson.objects.all()
@@ -30,7 +32,8 @@ class LessonListCreateApiView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        lesson = serializer.save(user=self.request.user)
+        tasks.send_mainling.delay(lesson.course)
 
 
 class LessonAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -69,7 +72,6 @@ class PaymentCashCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         payment_cash = serializer.save(method='Наличные')
-        models.Subscribe.objects.get(user=payment_cash.user, ).is_active = True
 
 
 class PaymentOnlineCreateAPIView(generics.CreateAPIView):
@@ -88,16 +90,3 @@ class PaymentOnlineCreateAPIView(generics.CreateAPIView):
         self.perform_create(serializer)
         pay_url = serializer.data.get('pay_url')
         return Response({'payment': serializer.data, 'pay_url': pay_url}, status=status.HTTP_201_CREATED)
-
-
-@authentication_classes([])
-@permission_classes([AllowAny])
-class SubscribeActivateAPIView(APIView):
-
-    def get(self, request):
-        user_id = request.query_params.get('user', None)
-        course_id = request.query_params.get('course', None)
-        subscribe = models.Subscribe.objects.get(user_id=user_id, course_id=course_id)
-        subscribe.is_active = True
-        subscribe.save()
-        return Response({'message': 'Подписка активирована'}, status=status.HTTP_200_OK)
