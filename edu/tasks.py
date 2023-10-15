@@ -21,10 +21,8 @@ def send_mainling(course):
 
 @shared_task
 def check_activity():
-    users = User.objects.all()
-    for user in users:
-        one_month_ago = timezone.now() - timezone.timedelta(days=30)
-        inactive_users = User.objects.filter(last_login__lt=one_month_ago, is_active=True)
-        for user in inactive_users:
-            user.is_active = False
-            user.save()
+    one_month_ago = timezone.now() - timezone.timedelta(days=30)
+    inactive_users = User.objects.filter(last_login__lt=one_month_ago, is_active=True)
+    for user in inactive_users:
+        user.is_active = False
+        user.save()

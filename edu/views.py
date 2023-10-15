@@ -46,7 +46,7 @@ class PaymentListApiView(generics.ListAPIView):
     queryset = models.Payment.objects.all()
     serializer_class = serializators.PaymentSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['course', 'lesson', 'method']
+    filterset_fields = ['course', 'method']
     ordering_fields = ['datetime']
 
 
@@ -71,7 +71,7 @@ class PaymentCashCreateAPIView(generics.CreateAPIView):
     permission_classes = [IsModerator, IsAuthenticated]
 
     def perform_create(self, serializer):
-        payment_cash = serializer.save(method='Наличные')
+        serializer.save(method='Наличные')
 
 
 class PaymentOnlineCreateAPIView(generics.CreateAPIView):

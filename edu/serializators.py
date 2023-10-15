@@ -17,7 +17,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Lesson
-        fields = ['id', 'title', 'description', 'video', 'course', 'price']
+        fields = ['id', 'title', 'description', 'video', 'course']
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -63,10 +63,10 @@ class PaymentOnlineSerializer(serializers.ModelSerializer):
 
 
 class PaymentCashSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Payment
-        fields = '__all__'
-
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
     course = CourseSerializer(read_only=True)
     amount = serializers.DecimalField(max_digits=9, decimal_places=2, required=True)
+
+    class Meta:
+        model = models.Payment
+        fields = '__all__'
