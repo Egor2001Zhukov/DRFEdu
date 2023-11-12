@@ -1,9 +1,11 @@
 venv
 .idea
 .env
+requirements.txt
+conf/nginx.conf
+.env.template
 .env.docker
 .coverage
 celerybeat-schedule.bak
 celerybeat-schedule.dat
 celerybeat-schedule.dir
-edu_data.json
