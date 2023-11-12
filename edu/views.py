@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status
 from rest_framework.filters import OrderingFilter
@@ -90,3 +91,7 @@ class PaymentOnlineCreateAPIView(generics.CreateAPIView):
         self.perform_create(serializer)
         pay_url = serializer.data.get('pay_url')
         return Response({'payment': serializer.data, 'pay_url': pay_url}, status=status.HTTP_201_CREATED)
+
+
+def health(request):
+    return JsonResponse({"status": "ok"})

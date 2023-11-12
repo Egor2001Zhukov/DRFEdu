@@ -4,7 +4,6 @@ venv
 requirements.txt
 conf/nginx.conf
 .env.template
-.env.docker
 .coverage
 celerybeat-schedule.bak
 celerybeat-schedule.dat

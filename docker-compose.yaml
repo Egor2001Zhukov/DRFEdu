@@ -17,21 +17,33 @@ services:
       - redis
       - celery
     env_file:
-      - ./.env.docker
+      - .env.docker
+    restart: on-failure:5
+    healthcheck:
+      test: curl -f http://127.0.0.1:8000/edu/health || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   postgres-db:
     image: postgres:latest
     container_name: postgres
-    environment:
-      POSTGRES_DB: DRFEduDB
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
+    env_file:
+      - .env.docker
     ports:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     networks:
       - DRFEdu-network
+    restart: on-failure:5
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   redis:
     image: redis:latest
@@ -39,6 +51,11 @@ services:
       - "6379:6379"
     networks:
       - DRFEdu-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   celery:
     build:
@@ -52,7 +69,7 @@ services:
     networks:
       - DRFEdu-network
     env_file:
-      - ./.env.docker
+      - .env.docker
 
   celery-beat:
     build:
@@ -67,7 +84,7 @@ services:
     networks:
       - DRFEdu-network
     env_file:
-      - ./.env.docker
+      - .env.docker
 
   nginx:
     image: nginx:latest
